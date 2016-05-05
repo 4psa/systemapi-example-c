@@ -12,7 +12,7 @@
 CC = g++
 
 # flags
-FLAGS = -lssl -DDEBUG -DWITH_OPENSSL
+FLAGS = -lcrypto -lssl -DDEBUG -DWITH_OPENSSL
 
 # executables for 'all' target
 EXECS = demoaddserviceprovider demoaddorganization demoadduser demoaddextension democallcosts
