@@ -29,6 +29,7 @@
 
 // CHANGEME
 #define COUNTRY "ro"
+#define COMPANY "TEST COMPANY"
 
 int main(int argc, char *argv[])
 {
@@ -51,7 +52,7 @@ int main(int argc, char *argv[])
 
 
     // We will add a new Organization, so we need an Organization object
-    Organization *organization = new Organization;
+    OrganizationProxy *organization = new OrganizationProxy;
     if (NULL == organization) {
         std::cerr << "Failed creating an Organization object" << std::endl;
         exit(EXIT_FAILURE);
@@ -66,41 +67,39 @@ int main(int argc, char *argv[])
         std::cerr << "Failed creating a SOAP_ENV__Header object" << std::endl;
         exit(EXIT_FAILURE);
     }
-    organization->soap->header->ns4__serverInfo = NULL;
-    organization->soap->header->ns4__userCredentials =
-            new _ns4__userCredentials;
-    if (NULL == organization->soap->header->ns4__userCredentials) {
-        std::cerr << "Failed creating an _ns4__userCredentials object" << std::endl;
+    organization->soap->header->ns3__serverInfo = NULL;
+    organization->soap->header->ns3__userCredentials = new _ns3__userCredentials;
+    if (NULL == organization->soap->header->ns3__userCredentials) {
+        std::cerr << "Failed creating an _ns3__userCredentials object" << std::endl;
         exit(EXIT_FAILURE);
     }
-    organization->soap->header->ns4__userCredentials->accessToken =
-            accessToken;
+    organization->soap->header->ns3__userCredentials->accessToken = accessToken;
 
     // creating 2 objects for the request and for the response
-    _ns10__AddOrganization *request = new _ns10__AddOrganization;
+    _ns9__AddOrganization *request = new _ns9__AddOrganization;
     if (NULL == request) {
         std::cerr << "Failed creating an AddOrganization object" << std::endl;
         exit(EXIT_FAILURE);
     }
-    _ns10__AddOrganizationResponse *response =
-            new _ns10__AddOrganizationResponse;
-    if (NULL == response) {
-        std::cerr << "Failed creating an AddOrganizationResponse object" <<
-                std::endl;
-        exit(EXIT_FAILURE);
-    }
+    _ns9__AddOrganizationResponse response;
 
 
     // information about the new organization (name, login, password, country and charging plan)
     std::stringstream name_ss;
     std::stringstream login_ss;
-    std::stringstream pass_ss;
+    std::stringstream firstname_ss;
+    std::stringstream lastname_ss;
+    std::stringstream email_ss;
 
     std::string name;
     std::string login;
-    std::string pass;
+    std::string firstname;
+    std::string lastname;
+    std::string email;
     std::string country(COUNTRY);
+    std::string company(COMPANY);
     std::string chargingPlanID;
+    bool passAuto = true;
 
     srand(time(NULL));
 
@@ -108,18 +107,30 @@ int main(int argc, char *argv[])
     // filling in the information about the new organization (name, login, password, country and charging plan)
     name_ss << "OrganizationCPP_" << rand() % 1000;
     login_ss << "Organization_" << rand() % 1000;
-    pass_ss << "Pass_" << rand() % 1000;
-
+    firstname_ss << "FirstnameCPP_" << rand() % 1000;
+    lastname_ss << "LastnameCPP_" << rand() % 1000;
+    email_ss << "EmailOrganization_" << rand() % 1000 << "@example.com";
 
     name_ss >> name;
     login_ss >> login;
-    pass_ss >> pass;
+    firstname_ss >> firstname;
+    lastname_ss >> lastname;
+    email_ss >> email;
 
-    request->name = &name;
-    request->login = &login;
-    request->password = &pass;
-    request->country = &country;
+    request->__AddOrganization_sequence = new __ns9__AddOrganization_sequence;
+    if (NULL == request->__AddOrganization_sequence) {
+        std::cerr << "Failed creatin an __AddOrganization_sequence object" << std::endl;
+        exit(EXIT_FAILURE);
+    }
 
+    request->__AddOrganization_sequence->ns8__name = &name;
+    request->__AddOrganization_sequence->ns8__login = &login;
+    request->__AddOrganization_sequence->ns8__firstName = &firstname;
+    request->__AddOrganization_sequence->ns8__lastName = &lastname;
+    request->__AddOrganization_sequence->ns8__email = &email;
+    request->__AddOrganization_sequence->ns8__passwordAuto = &passAuto;
+    request->__AddOrganization_sequence->ns8__country = &country;
+    request->__AddOrganization_sequence->ns8__company = &company;
 
     // Service Provider ID - passed from command line or randomly generated
     std::string parentID;
@@ -135,7 +146,7 @@ int main(int argc, char *argv[])
         // getting all service providers
 
         // we need a ServiceProvider object 
-        ServiceProvider *serviceProvider = new ServiceProvider;
+        ServiceProviderProxy *serviceProvider = new ServiceProviderProxy;
         if (NULL == serviceProvider) {
             std::cerr << "Failed creating a ServiceProvider object" << std::endl;
             exit(EXIT_FAILURE);
@@ -147,35 +158,30 @@ int main(int argc, char *argv[])
             std::cerr << "Failed creating a SOAP_ENV__Header object" << std::endl;
             exit(EXIT_FAILURE);
         }
-        serviceProvider->soap->header->ns4__serverInfo = NULL;
-        serviceProvider->soap->header->ns4__userCredentials = new _ns4__userCredentials;
-        if (NULL == serviceProvider->soap->header->ns4__userCredentials) {
-            std::cerr << "Failed creating an _ns4__userCredentials object" << std::endl;
+        serviceProvider->soap->header->ns3__serverInfo = NULL;
+        serviceProvider->soap->header->ns3__userCredentials = new _ns3__userCredentials;
+        if (NULL == serviceProvider->soap->header->ns3__userCredentials) {
+            std::cerr << "Failed creating an _ns3__userCredentials object" << std::endl;
             exit(EXIT_FAILURE);
         }
-        serviceProvider->soap->header->ns4__userCredentials->accessToken = accessToken;
+        serviceProvider->soap->header->ns3__userCredentials->accessToken = accessToken;
 
         // creating 2 objects for the request and for the response
-        _ns7__GetServiceProviders * spRequest = new _ns7__GetServiceProviders;
+        _ns6__GetServiceProviders * spRequest = new _ns6__GetServiceProviders;
         if (NULL == spRequest) {
-            std::cerr << "Failed creating a GetServiceProviders object" << std::endl;
+            std::cerr << "Failed creating a _ns6__GetServiceProviders object" << std::endl;
             exit(EXIT_FAILURE);
         }
-        _ns7__GetServiceProvidersResponse *spResponse = new _ns7__GetServiceProvidersResponse;
-        if (NULL == spResponse) {
-            std::cerr << "Failed creating a GetServiceProvidersResponse object" << std::endl;
-            exit(EXIT_FAILURE);
-        }
-
+        _ns6__GetServiceProvidersResponse spResponse;
 
         // making the request for getting service providers and getting the response
-        int errCodeSP = serviceProvider->__ns25__GetServiceProviders(spRequest, spResponse);
+        int errCodeSP = serviceProvider->GetServiceProviders(spRequest, spResponse);
         if (SOAP_OK == errCodeSP) {
             // no error
             std::cout << "OK retrieving service providers" << std::endl;
 
             // if no service providers exist, will exit
-            if (0 == spResponse->serviceProvider.size()) {
+            if (0 == spResponse.serviceProvider.size()) {
                 std::cerr << "No service providers are defined" << std::endl;
                 exit(EXIT_FAILURE);
             }
@@ -183,14 +189,16 @@ int main(int argc, char *argv[])
             // found service providers
 
             // randomly choosing a service provider
-            int randomIndex = rand() % spResponse->serviceProvider.size();
+            srand(time(NULL));
+            int randomIndex = rand() % spResponse.serviceProvider.size();
 
             // getting the id of the service provider
-            std::string randomID = *spResponse->serviceProvider.at(randomIndex)->ns6__ID;
+            std::string randomID = *spResponse.serviceProvider.at(randomIndex)->ns5__ID;
             std::cout << "Using random service provider ID " << randomID << std::endl;
             parentID = randomID;
 
         } else {
+
             // error found
             soap *s = new soap;
             if (s == NULL) {
@@ -199,10 +207,14 @@ int main(int argc, char *argv[])
             }
             s->error = errCodeSP;
             soap_print_fault(s, stderr);
+            delete s;
         }
+
+        spRequest->~_ns6__GetServiceProviders();
+        delete spRequest;
     }
 
-    request->ns5__parentID = &parentID;
+    request->ns4__parentID = &parentID;
 
     // get a random charging plan ID using RandomChargingPlan class
     RandomChargingPlan *rcp = new RandomChargingPlan(accessToken, parentID);
@@ -213,12 +225,13 @@ int main(int argc, char *argv[])
 
     chargingPlanID = rcp->getRandomChargingPlan();
     if (chargingPlanID != NO_CHARGING_PLAN_FOUND) {
-        request->ns5__chargingPlanID = &chargingPlanID;
+        request->__AddOrganization_sequence->ns8__chargingIdentifier = &chargingPlanID;
     }
 
+    delete rcp;
 
     // making the request for adding organization and getting the response
-    int errCode = organization->__ns26__AddOrganization(request, response);
+    int errCode = organization->AddOrganization(request, response);
     if (SOAP_OK == errCode) {
         // no error
         std::cout << "OK adding organization" << std::endl;
@@ -232,7 +245,11 @@ int main(int argc, char *argv[])
         s->error = errCode;
         soap_print_fault(s, stderr);
         std::cerr << "Please check the log files for more information" << std::endl;
+        delete s;
     }
+
+    request->~_ns9__AddOrganization();
+    delete request;
 
     return 0;
 }

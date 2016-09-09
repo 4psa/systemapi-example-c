@@ -19,7 +19,7 @@ BADARGS=65
 
 if [ $# -ne $EXPECTED_ARGS ]
 then
-	echo "Usage: ./createDemoFiles.sh server_IP PATH_TO_GSOAP PATH_TO_SCHEMA_FILES"
+	echo "Usage: ./createDemoFiles.sh server_hostname PATH_TO_GSOAP PATH_TO_SCHEMA_FILES"
 	exit $BADARGS
 fi
 
@@ -34,11 +34,10 @@ PATH_TO_GSOAP="$2/gsoap"
 PATH_TO_SCHEMA=$3
 # path to demo files
 PATH_TO_DEMO="${PATH_TO_BASE}/Demo"
-
 # path to gsoap's wsdl2h
-PATH_TO_WSDL2H="${PATH_TO_GSOAP}/bin/linux386/wsdl2h"
+PATH_TO_WSDL2H="wsdl2h"
 # path to gsoap's soapcpp2
-PATH_TO_SOAPCPP2="${PATH_TO_GSOAP}/bin/linux386/soapcpp2"
+PATH_TO_SOAPCPP2="soapcpp2"
 # path to voipnowservice.wsdl
 PATH_TO_WSDL="${PATH_TO_SCHEMA}/voipnowservice.wsdl"
 # path to gsoap schema files
@@ -46,16 +45,8 @@ PATH_TO_WS="${PATH_TO_GSOAP}/WS/"
 # path to gsoap imports
 PATH_TO_IMPORT="${PATH_TO_GSOAP}/import/"
 
-# replace CHANGEME with server IP in wsdl files
-sed "s/CHANGEME/$1/g" ${PATH_TO_SCHEMA}/Account/Account.wsdl > ${PATH_TO_SCHEMA}/Account/copy
-DIRLIST=$(find ${PATH_TO_SCHEMA} -type d)
-for dir in $DIRLIST; do
-	ls -la ${dir}/*.wsdl;
-	sed "s/CHANGEME/$1/g" ${dir}/*.wsdl > ${dir}/copy;
-	cp ${dir}/copy ${dir}/*.wsdl;
-	rm -f ${dir}/copy
-done
-
+# replace endpoint with provided hostname
+find ${PATH_TO_SCHEMA} -iname "*.wsdl" -exec sed -i "s#<soap:address location=\"https://[^/]*#<soap:address location=\"https://$1#g" {} \;
 
 # compile the WSDL
 # please check README for parameter significance
@@ -63,7 +54,7 @@ ${PATH_TO_WSDL2H} -I ${PATH_TO_WS} -f -u -k -o voip.h ${PATH_TO_WSDL}
 
 # generate C++ stub files
 # please check README for parameter significance
-${PATH_TO_SOAPCPP2} -C -L -I ${PATH_TO_IMPORT} -w -x voip.h
+${PATH_TO_SOAPCPP2} -C -L -I ${PATH_TO_IMPORT} -w -x -j voip.h
 
 # copy generated files to Demo folder
 cp -f ${PATH_TO_BASE}/soap*.h \

@@ -23,12 +23,12 @@ SOURCES = DemoAddServiceProvider.cpp DemoAddOrganization DemoAddUser DemoAddExte
 # all objects
 OBJECTS = $(SOURCES:.c=.o)
 
-GEN_SOURCES = soapC.cpp soapClient.cpp stdsoap2.cpp
+GEN_SOURCES = soapC.cpp stdsoap2.cpp soapAccountProxy.cpp soapBillingProxy.cpp soapChannelProxy.cpp soapExtensionProxy.cpp soapOrganizationProxy.cpp soapPBXProxy.cpp soapReportProxy.cpp soapServiceProviderProxy.cpp soapUserProxy.cpp
 
 #dependencies
 
 # general dependencies
-GEN_OBJ = soapC.o soapClient.o stdsoap2.o
+GEN_OBJ = soapC.o stdsoap2.o soapAccountProxy.o soapBillingProxy.o soapChannelProxy.o soapExtensionProxy.o soapOrganizationProxy.o soapPBXProxy.o soapReportProxy.o soapServiceProviderProxy.o soapUserProxy.o
 
 # demoaddserviceprovider dependencies
 SP_OBJ = DemoAddServiceProvider.o $(GEN_OBJ) RandomChargingPlan.o
@@ -59,7 +59,7 @@ demoaddextension: $(EXT_OBJ)
 	$(CC) $(FLAGS) -o demoaddextension DemoAddExtension.cpp $(GEN_SOURCES) utils.cpp
 
 democallcosts: $(CST_OBJ)
-	$(CC) $(FLAGS) -o democallcosts DemoCallCosts.cpp $(GEN_SOURCES)
+	$(CC) $(FLAGS) -o democallcosts DemoCallCosts.cpp $(GEN_SOURCES) utils.cpp
 
 clean:
 	rm -f *.o

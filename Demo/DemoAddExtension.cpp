@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
 
 
     // We will add a new extension, so we need an Extension Object
-    Extension *extension = new Extension;
+    ExtensionProxy *extension = new ExtensionProxy;
     if (NULL == extension) {
         std::cerr << "Failed creating an Extension object" << std::endl;
         exit(EXIT_FAILURE);
@@ -63,50 +63,40 @@ int main(int argc, char *argv[])
         std::cerr << "Failed creating a SOAP_ENV__Header object" << std::endl;
         exit(EXIT_FAILURE);
     }
-    extension->soap->header->ns4__serverInfo = NULL;
-    extension->soap->header->ns4__userCredentials =
-            new _ns4__userCredentials;
-    if (NULL == extension->soap->header->ns4__userCredentials) {
-        std::cerr << "Failed creating an ns4__userCredentials object" << std::endl;
+    extension->soap->header->ns3__serverInfo = NULL;
+    extension->soap->header->ns3__userCredentials =
+            new _ns3__userCredentials;
+    if (NULL == extension->soap->header->ns3__userCredentials) {
+        std::cerr << "Failed creating an ns3__userCredentials object" << std::endl;
         exit(EXIT_FAILURE);
     }
-    extension->soap->header->ns4__userCredentials->accessToken =
+    extension->soap->header->ns3__userCredentials->accessToken =
             accessToken;
 
     // creating two objects for the request and for the response
-    _ns14__AddExtension *request = new _ns14__AddExtension;
+    _ns13__AddExtension *request = new _ns13__AddExtension;
     if (NULL == request) {
-        std::cerr << "Failed creating an AddExtension object" << std::endl;
+        std::cerr << "Failed creating an _ns13__AddExtension object" << std::endl;
         exit(EXIT_FAILURE);
     }
 
-    _ns14__AddExtensionResponse *response =
-            new _ns14__AddExtensionResponse;
-    if (NULL == response) {
-        std::cerr << "Failed creating an AddExtensionResponse object" << std::endl;
-        exit(EXIT_FAILURE);
-    }
-
-
+    _ns13__AddExtensionResponse response;
 
     // information about the new extension (label and password)
     std::stringstream label_ss;
-    std::stringstream pass_ss;
 
     std::string label;
-    std::string pass;
+    bool passAuto = true;
 
     srand(time(NULL));
 
     // filling in the information about the new extension (label and password)
     label_ss << "ExtensionCPP_" << rand() % 1000;
-    pass_ss << "Pass_" << rand() % 1000;
 
     label_ss >> label;
-    pass_ss >> pass;
 
-    request->ns15__label = label;
-    request->ns15__password = &pass;
+    request->ns14__label = label;
+    request->passwordAuto = &passAuto;
 
 
     // User ID - passed from command line or randomly generated
@@ -123,7 +113,7 @@ int main(int argc, char *argv[])
         // getting all users
 
         // we need a User object
-        User *user = new User;
+        UserProxy *user = new UserProxy;
         if (NULL == user) {
             std::cerr << "Failed creating a User object" << std::endl;
             exit(EXIT_FAILURE);
@@ -135,35 +125,31 @@ int main(int argc, char *argv[])
             std::cerr << "Failed creating a SOAP_ENV__Header object" << std::endl;
             exit(EXIT_FAILURE);
         }
-        user->soap->header->ns4__serverInfo = NULL;
-        user->soap->header->ns4__userCredentials = new _ns4__userCredentials;
-        if (NULL == user->soap->header->ns4__userCredentials) {
-            std::cerr << "Failed creating an _ns4__userCredentials object" << std::endl;
+        user->soap->header->ns3__serverInfo = NULL;
+        user->soap->header->ns3__userCredentials = new _ns3__userCredentials;
+        if (NULL == user->soap->header->ns3__userCredentials) {
+            std::cerr << "Failed creating an _ns3__userCredentials object" << std::endl;
             exit(EXIT_FAILURE);
         }
-        user->soap->header->ns4__userCredentials->accessToken = accessToken;
+        user->soap->header->ns3__userCredentials->accessToken = accessToken;
 
         // creating 2 objects for the request and for the response
-        _ns11__GetUsers * usrRequest = new _ns11__GetUsers;
+        _ns10__GetUsers * usrRequest = new _ns10__GetUsers;
         if (NULL == usrRequest) {
-            std::cerr << "Failed creating a GetUsers object" << std::endl;
+            std::cerr << "Failed creating a _ns10__GetUsers object" << std::endl;
             exit(EXIT_FAILURE);
         }
 
-        _ns11__GetUsersResponse *usrResponse = new _ns11__GetUsersResponse;
-        if (NULL == usrResponse) {
-            std::cerr << "Failed creating a GetUsersResponse object" << std::endl;
-            exit(EXIT_FAILURE);
-        }
+        _ns10__GetUsersResponse usrResponse;
 
 
         // making the request for getting users and getting the response
-        int errCodeUsr = user->__ns27__GetUsers(usrRequest, usrResponse);
+        int errCodeUsr = user->GetUsers(usrRequest, usrResponse);
         if (SOAP_OK == errCodeUsr) {
             // no error
             std::cout << "OK retrieving users" << std::endl;
 
-            if (0 == usrResponse->user.size()) {
+            if (0 == usrResponse.user.size()) {
                 // no users exist
                 std::cerr << "No users are defined" << std::endl;
                 exit(EXIT_FAILURE);
@@ -172,10 +158,10 @@ int main(int argc, char *argv[])
             // found users
 
             // randomly choosing a user
-            int randomIndex = rand() % usrResponse->user.size();
+            int randomIndex = rand() % usrResponse.user.size();
 
             // getting the id of the service provider
-            std::string randomID = *usrResponse->user.at(randomIndex)->ns6__ID;
+            std::string randomID = *usrResponse.user.at(randomIndex)->ns5__ID;
             std::cout << "Using random user ID " << randomID << std::endl;
             parentID = randomID;
 
@@ -188,13 +174,17 @@ int main(int argc, char *argv[])
             }
             s->error = errCodeUsr;
             soap_print_fault(s, stderr);
+            delete s;
         }
+
+        usrRequest->~_ns10__GetUsers();
+        delete usrRequest;
     }
 
-    request->ns5__parentID = &parentID;
+    request->ns4__parentID = &parentID;
 
     // making the request and getting the response
-    int errCode = extension->__ns28__AddExtension(request, response);
+    int errCode = extension->AddExtension(request, response);
     if (SOAP_OK == errCode) {
         // no error
         std::cout << "OK adding extension" << std::endl;
@@ -208,7 +198,10 @@ int main(int argc, char *argv[])
         s->error = errCode;
         soap_print_fault(s, stderr);
         std::cerr << "Please check the log files for more information" << std::endl;
+        delete s;
     }
+
+    request->~_ns13__AddExtension();
 
     return 0;
 }

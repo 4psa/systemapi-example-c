@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 
 
     // We will add a new user, so we need an User object
-    User *user = new User;
+    UserProxy *user = new UserProxy;
     if (NULL == user) {
         std::cerr << "Failed creating a User object" << std::endl;
         exit(EXIT_FAILURE);
@@ -65,55 +65,69 @@ int main(int argc, char *argv[])
         std::cerr << "Failed creating a SOAP_ENV__Header object" << std::endl;
         exit(EXIT_FAILURE);
     }
-    user->soap->header->ns4__serverInfo = NULL;
-    user->soap->header->ns4__userCredentials = new _ns4__userCredentials;
-    if (NULL == user->soap->header->ns4__userCredentials) {
-        std::cerr << "Failed creating an _ns4__userCredentials object" << std::endl;
+    user->soap->header->ns3__serverInfo = NULL;
+    user->soap->header->ns3__userCredentials = new _ns3__userCredentials;
+    if (NULL == user->soap->header->ns3__userCredentials) {
+        std::cerr << "Failed creating an _ns3__userCredentials object" << std::endl;
         exit(EXIT_FAILURE);
     }
-    user->soap->header->ns4__userCredentials->accessToken = accessToken;
+    //std::cout << accessToken << std::endl;
+
+    user->soap->header->ns3__userCredentials->accessToken = accessToken;
 
     // creating 2 objects for the request and for the response
-    _ns11__AddUser *request = new _ns11__AddUser;
+    _ns10__AddUser *request = new _ns10__AddUser;
     if (NULL == request) {
-        std::cerr << "Failed creating an AddUser object" << std::endl;
+        std::cerr << "Failed creating an _ns10__AddUser object" << std::endl;
         exit(EXIT_FAILURE);
     }
 
-    _ns11__AddUserResponse *response = new _ns11__AddUserResponse;
-    if (NULL == response) {
-        std::cerr << "Failed creating an AddUserResponse object" << std::endl;
-        exit(EXIT_FAILURE);
-    }
-
+    _ns10__AddUserResponse response;
 
     // information about the new user (name, login, password, country and charging plan)
     std::stringstream name_ss;
     std::stringstream login_ss;
-    std::stringstream pass_ss;
+    std::stringstream firstname_ss;
+    std::stringstream lastname_ss;
+    std::stringstream email_ss;
 
     std::string name;
     std::string login;
-    std::string pass;
+    std::string firstname;
+    std::string lastname;
+    std::string email;
     std::string country(COUNTRY);
     std::string chargingPlanID;
+    bool passAuto = true;
 
     srand(time(NULL));
 
     // filling in the information about the new user (name, login, password and country)
     name_ss << "UserCPP_" << rand() % 1000;
     login_ss << "User_" << rand() % 1000;
-    pass_ss << "Pass_" << rand() % 1000;
+    firstname_ss << "FirstnameCPP_" << rand() % 1000;
+    lastname_ss << "LastnameCPP_" << rand() % 1000;
+    email_ss << "EmailUser_" << rand() % 1000 << "@example.com";
 
     name_ss >> name;
     login_ss >> login;
-    pass_ss >> pass;
+    firstname_ss >> firstname;
+    lastname_ss >> lastname;
+    email_ss >> email;
 
+    request->__AddUser_sequence = new __ns10__AddUser_sequence;
+    if (NULL == request->__AddUser_sequence) {
+        std::cerr << "Failed creating an __AddUser_sequence object" << std::endl;
+        exit(EXIT_FAILURE);
+    }
 
-    request->name = &name;
-    request->login = &login;
-    request->password = &pass;
-    request->country = &country;
+    request->__AddUser_sequence->ns8__name = &name;
+    request->__AddUser_sequence->ns8__login = &login;
+    request->__AddUser_sequence->ns8__firstName = &firstname;
+    request->__AddUser_sequence->ns8__lastName = &lastname;
+    request->__AddUser_sequence->ns8__email = &email;
+    request->__AddUser_sequence->ns8__passwordAuto= &passAuto;
+    request->__AddUser_sequence->ns8__country = &country;
 
     // Organization ID - passed from command line or randomly generated
     std::string parentID;
@@ -129,7 +143,7 @@ int main(int argc, char *argv[])
         // getting all organizations
 
         // we need an Organization object 
-        Organization *organization = new Organization;
+        OrganizationProxy *organization = new OrganizationProxy;
         if (NULL == organization) {
             std::cerr << "Failed creating an Organization object" << std::endl;
             exit(EXIT_FAILURE);
@@ -141,35 +155,33 @@ int main(int argc, char *argv[])
             std::cerr << "Failed creating a SOAP_ENV__Header object" << std::endl;
             exit(EXIT_FAILURE);
         }
-        organization->soap->header->ns4__serverInfo = NULL;
-        organization->soap->header->ns4__userCredentials = new _ns4__userCredentials;
-        if (NULL == organization->soap->header->ns4__userCredentials) {
-            std::cerr << "Failed creating a _ns4__userCredentials object" << std::endl;
+        organization->soap->header->ns3__serverInfo = NULL;
+        organization->soap->header->ns3__userCredentials = new _ns3__userCredentials;
+        if (NULL == organization->soap->header->ns3__userCredentials) {
+            std::cerr << "Failed creating a _ns3__userCredentials object" << std::endl;
             exit(EXIT_FAILURE);
         }
-        organization->soap->header->ns4__userCredentials->accessToken = accessToken;
+
+        //std::cout << accessToken << std::endl;
+
+        organization->soap->header->ns3__userCredentials->accessToken = accessToken;
 
         // creating 2 objects for the request and for the response
-        _ns10__GetOrganizations * orgRequest = new _ns10__GetOrganizations;
+        _ns9__GetOrganizations *orgRequest = new _ns9__GetOrganizations;
         if (NULL == orgRequest) {
-            std::cerr << "Failed creating a GetOrganizations object" << std::endl;
+            std::cerr << "Failed creating a _ns9__GetOrganizations object" << std::endl;
             exit(EXIT_FAILURE);
         }
 
-        _ns10__GetOrganizationsResponse *orgResponse = new _ns10__GetOrganizationsResponse;
-        if (NULL == orgResponse) {
-            std::cerr << "Failed creating a GetOrganizationsResponse object" << std::endl;
-            exit(EXIT_FAILURE);
-        }
-
+        _ns9__GetOrganizationsResponse orgResponse;
 
         // making the request for getting the organizations and getting the response
-        int errCodeOrg = organization->__ns26__GetOrganizations(orgRequest, orgResponse);
+        int errCodeOrg = organization->GetOrganizations(orgRequest, orgResponse);
         if (SOAP_OK == errCodeOrg) {
             // no error
             std::cout << "OK retrieving organizations" << std::endl;
 
-            if (0 == orgResponse->organization.size()) {
+            if (0 == orgResponse.organization.size()) {
                 // no organizations found
                 std::cerr << "No organizations are defined" << std::endl;
                 exit(EXIT_FAILURE);
@@ -178,14 +190,15 @@ int main(int argc, char *argv[])
             // found organizations
 
             // randomly choosing an organization
-            int randomIndex = rand() % orgResponse->organization.size();
+            int randomIndex = rand() % orgResponse.organization.size();
 
             // getting the id of the organization
-            std::string randomID = *orgResponse->organization.at(randomIndex)->ns6__ID;
+            std::string randomID = *orgResponse.organization.at(randomIndex)->ns5__ID;
             std::cout << "Using random organization ID " << randomID << std::endl;
             parentID = randomID;
 
         } else {
+
             // error found
             soap *s = new soap;
             if (NULL == s) {
@@ -194,10 +207,14 @@ int main(int argc, char *argv[])
             }
             s->error = errCodeOrg;
             soap_print_fault(s, stderr);
+            delete s;
         }
+
+        orgRequest->~_ns9__GetOrganizations();
+        delete orgRequest;
     }
 
-    request->ns5__parentID = &parentID;
+    request->ns4__parentID = &parentID;
 
     // get a random charging plan ID using RandomChargingPlan class
     RandomChargingPlan *rcp = new RandomChargingPlan(accessToken, parentID);
@@ -208,12 +225,13 @@ int main(int argc, char *argv[])
 
     chargingPlanID = rcp->getRandomChargingPlan();
     if (chargingPlanID != NO_CHARGING_PLAN_FOUND) {
-        request->ns5__chargingPlanID = &chargingPlanID;
+        request->__AddUser_sequence->ns8__chargingIdentifier = &chargingPlanID;
     }
 
+    delete rcp;
 
     // making the request and getting the response
-    int errCode = user->__ns27__AddUser(request, response);
+    int errCode = user->AddUser(request, response);
     if (SOAP_OK == errCode) {
         // no error
         std::cout << "OK adding user" << std::endl;
@@ -227,7 +245,11 @@ int main(int argc, char *argv[])
         s->error = errCode;
         soap_print_fault(s, stderr);
         std::cerr << "Please check the log files for more information" << std::endl;
+        delete s;
     }
+
+    request->~_ns10__AddUser();
+    delete request;
 
     return 0;
 }
